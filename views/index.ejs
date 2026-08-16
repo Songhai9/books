@@ -1,12 +1,79 @@
 <%- include("partials/header.ejs") %>
 
-<section class="intro">
-  <p class="eyebrow">Multi-reader foundation ready</p>
-  <h1>Remember the books that shaped your thinking.</h1>
-  <p>
-    Reader selection, book listing, sorting, and editing will be implemented
-    in the next application steps.
-  </p>
-</section>
+<% if (!currentReader) { %>
+  <section class="empty-state">
+    <p class="eyebrow">Welcome to Book Notes</p>
+    <h1>Create your first reader.</h1>
+    <p>Each reader gets a personal collection, ratings, and notes.</p>
+    <a class="button" href="/readers/new">Add a reader</a>
+  </section>
+<% } else { %>
+  <div class="reader-library" style="--reader-color: <%= currentReader.color %>">
+    <nav class="reader-switcher" aria-label="Choose a reader">
+      <% readers.forEach((reader) => { %>
+        <a
+          class="reader-chip <%= reader.id === currentReader.id ? 'is-active' : '' %>"
+          href="/?reader=<%= reader.id %>&sort=<%= currentSort %>"
+          style="--profile-color: <%= reader.color %>"
+          <% if (reader.id === currentReader.id) { %>aria-current="page"<% } %>
+        >
+          <span class="reader-dot" aria-hidden="true"></span>
+          <%= reader.name %>
+        </a>
+      <% }) %>
+      <a class="reader-chip add-reader" href="/readers/new">+ Add reader</a>
+    </nav>
+
+    <section class="library-heading">
+      <div>
+        <p class="eyebrow"><%= books.length %> <%= books.length === 1 ? 'book' : 'books' %> recorded</p>
+        <h1><%= currentReader.name %>'s library</h1>
+      </div>
+
+      <form class="sort-form" action="/" method="get">
+        <input type="hidden" name="reader" value="<%= currentReader.id %>">
+        <label for="sort">Sort by</label>
+        <select id="sort" name="sort" onchange="this.form.submit()">
+          <option value="recent" <%= currentSort === 'recent' ? 'selected' : '' %>>Most recent</option>
+          <option value="rating" <%= currentSort === 'rating' ? 'selected' : '' %>>Highest rated</option>
+          <option value="title" <%= currentSort === 'title' ? 'selected' : '' %>>Title</option>
+        </select>
+      </form>
+    </section>
+
+    <% if (books.length === 0) { %>
+      <section class="empty-state compact">
+        <h2>No books yet</h2>
+        <p><%= currentReader.name %>'s first book will appear here.</p>
+      </section>
+    <% } else { %>
+      <section class="book-list" aria-label="Books read by <%= currentReader.name %>">
+        <% books.forEach((book) => { %>
+          <article class="book-card">
+            <div class="cover-frame">
+              <% if (book.cover_url) { %>
+                <img src="<%= book.cover_url %>" alt="Cover of <%= book.title %>">
+              <% } else { %>
+                <div class="cover-placeholder" aria-hidden="true">No cover</div>
+              <% } %>
+            </div>
+
+            <div class="book-content">
+              <div class="book-meta">
+                <span class="rating"><%= book.rating %>/10</span>
+                <time datetime="<%= book.date_read_iso %>">
+                  Read <%= book.date_read_label %>
+                </time>
+              </div>
+              <h2><%= book.title %></h2>
+              <p class="author">by <%= book.author %></p>
+              <p class="notes"><%= book.notes %></p>
+            </div>
+          </article>
+        <% }) %>
+      </section>
+    <% } %>
+  </div>
+<% } %>
 
 <%- include("partials/footer.ejs") %>
