@@ -1,0 +1,48 @@
+<%- include("partials/header.ejs") %>
+
+<section class="form-page wide" style="--reader-color: <%= entry.reader_color %>">
+  <p class="eyebrow" style="color: var(--reader-color)"><%= entry.reader_name %>'s library</p>
+  <h1>Edit your entry</h1>
+
+  <div class="edit-book-summary">
+    <% if (entry.cover_url) { %>
+      <img src="<%= entry.cover_url %>" alt="Cover of <%= entry.title %>">
+    <% } %>
+    <div>
+      <h2><%= entry.title %></h2>
+      <p class="author">by <%= entry.author %></p>
+      <p class="field-help">Title, author, and ISBN are shared book information and are not changed here.</p>
+    </div>
+  </div>
+
+  <% if (formError) { %>
+    <p class="form-error" role="alert"><%= formError %></p>
+  <% } %>
+
+  <form
+    class="book-fields edit-entry-form"
+    action="/readers/<%= entry.reader_id %>/books/<%= entry.entry_id %>/update"
+    method="post"
+  >
+    <div class="split-fields">
+      <div>
+        <label for="rating">Rating out of 10</label>
+        <input id="rating" name="rating" type="number" min="1" max="10" value="<%= values.rating %>" required>
+      </div>
+      <div>
+        <label for="dateRead">Date read</label>
+        <input id="dateRead" name="dateRead" type="date" value="<%= values.dateRead %>" required>
+      </div>
+    </div>
+
+    <label for="notes">Notes</label>
+    <textarea id="notes" name="notes" rows="10" required><%= values.notes %></textarea>
+
+    <div class="form-actions">
+      <button class="button" type="submit">Save changes</button>
+      <a class="text-link" href="/readers/<%= entry.reader_id %>/books/<%= entry.entry_id %>">Cancel</a>
+    </div>
+  </form>
+</section>
+
+<%- include("partials/footer.ejs") %>

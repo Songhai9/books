@@ -1,0 +1,48 @@
+<%- include("partials/header.ejs") %>
+
+<article class="book-detail" style="--reader-color: <%= entry.reader_color %>">
+  <div class="detail-cover">
+    <% if (entry.cover_url) { %>
+      <img src="<%= entry.cover_url %>" alt="Cover of <%= entry.title %>">
+    <% } else { %>
+      <div class="cover-placeholder" aria-hidden="true">No cover</div>
+    <% } %>
+  </div>
+
+  <div class="detail-content">
+    <p class="eyebrow" style="color: var(--reader-color)"><%= entry.reader_name %>'s library</p>
+    <h1><%= entry.title %></h1>
+    <p class="detail-author">by <%= entry.author %></p>
+
+    <div class="detail-meta">
+      <span class="rating"><%= entry.rating %>/10</span>
+      <time datetime="<%= entry.date_read_iso %>">Read <%= entry.date_read_label %></time>
+    </div>
+
+    <section class="detail-notes">
+      <h2>Notes</h2>
+      <p><%= entry.notes %></p>
+    </section>
+
+    <% if (entry.isbn) { %>
+      <p class="external-link">
+        ISBN <%= entry.isbn %> ·
+        <a href="https://openlibrary.org/isbn/<%= entry.isbn %>" rel="noreferrer">View on Open Library</a>
+      </p>
+    <% } %>
+
+    <div class="entry-actions">
+      <a class="button" href="/readers/<%= entry.reader_id %>/books/<%= entry.entry_id %>/edit">Edit entry</a>
+      <a class="text-link" href="/?reader=<%= entry.reader_id %>">Back to library</a>
+      <form
+        action="/readers/<%= entry.reader_id %>/books/<%= entry.entry_id %>/delete"
+        method="post"
+        onsubmit="return confirm('Remove this book from the selected library?')"
+      >
+        <button class="danger-button" type="submit">Delete entry</button>
+      </form>
+    </div>
+  </div>
+</article>
+
+<%- include("partials/footer.ejs") %>

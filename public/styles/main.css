@@ -235,6 +235,12 @@ input {
   margin: 0;
 }
 
+.book-link {
+  display: inline-block;
+  margin-top: 1rem;
+  font: 700 0.9rem Arial, sans-serif;
+}
+
 .empty-state.compact {
   margin-top: 2rem;
   padding: 2rem;
@@ -338,6 +344,113 @@ textarea {
   font: inherit;
 }
 
+.book-detail {
+  display: grid;
+  grid-template-columns: minmax(10rem, 16rem) 1fr;
+  gap: clamp(2rem, 6vw, 5rem);
+  align-items: start;
+}
+
+.detail-cover {
+  overflow: hidden;
+  border-radius: 0.3rem;
+  background: #ddd3c3;
+  box-shadow: 0 0.8rem 1.75rem rgb(74 59 42 / 22%);
+}
+
+.detail-cover img {
+  width: 100%;
+  display: block;
+}
+
+.detail-content h1 {
+  font-size: clamp(2.5rem, 7vw, 5rem);
+}
+
+.detail-author {
+  margin-block: -0.25rem 1.5rem;
+  color: #675e52;
+  font-size: 1.25rem;
+  font-style: italic;
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: #675e52;
+  font: 0.9rem Arial, sans-serif;
+}
+
+.detail-notes {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 3px solid var(--reader-color);
+}
+
+.detail-notes p {
+  white-space: pre-line;
+}
+
+.external-link {
+  color: #675e52;
+  font: 0.85rem Arial, sans-serif;
+}
+
+.entry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.entry-actions form {
+  margin-left: auto;
+}
+
+.danger-button {
+  border: 1px solid #a93030;
+  border-radius: 0.35rem;
+  padding: 0.7rem 0.9rem;
+  color: #8d2424;
+  background: transparent;
+  font: 700 0.9rem Arial, sans-serif;
+  cursor: pointer;
+}
+
+.edit-book-summary {
+  display: grid;
+  grid-template-columns: 5rem 1fr;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #cabfae;
+}
+
+.edit-book-summary img {
+  width: 5rem;
+  border-radius: 0.2rem;
+}
+
+.edit-book-summary .author {
+  margin-bottom: 0.25rem;
+}
+
+.edit-entry-form {
+  max-width: 40rem;
+  margin-top: 2rem;
+  font-family: Arial, sans-serif;
+}
+
+.edit-entry-form label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
 .reader-form input[type="color"] {
   width: 5rem;
   height: 3rem;
@@ -408,5 +521,22 @@ a:focus-visible {
 
   .split-fields {
     grid-template-columns: 1fr;
+  }
+
+  .book-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-cover {
+    width: 8rem;
+  }
+
+  .entry-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .entry-actions form {
+    margin-left: 0;
   }
 }

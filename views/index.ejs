@@ -69,6 +69,7 @@
               <h2><%= book.title %></h2>
               <p class="author">by <%= book.author %></p>
               <p class="notes"><%= book.notes %></p>
+              <a class="book-link" href="/readers/<%= currentReader.id %>/books/<%= book.entry_id %>">View notes and actions</a>
             </div>
           </article>
         <% }) %>

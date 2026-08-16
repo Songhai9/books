@@ -8,8 +8,8 @@ end-to-end DevOps portfolio.
 
 ## Current status
 
-Phase 2.4 provides reader selection, reader-specific book lists, sorting, and
-ISBN-based book creation through Open Library. Editing and deletion come next.
+Phase 2.5 provides reader selection, ISBN-based book creation through Open
+Library, reader-specific book details, editing, and deletion.
 
 ## Requirements
 
