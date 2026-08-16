@@ -1,0 +1,25 @@
+<mxfile host="app.diagrams.net" modified="2026-08-16T00:00:00.000Z" agent="Codex" version="24.7.17">
+  <diagram id="book-notes-database" name="Book Notes Database">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="readers" value="&lt;b&gt;readers&lt;/b&gt;&lt;hr&gt;PK id : SERIAL&lt;br&gt;UQ name : VARCHAR(80)&lt;br&gt;color : VARCHAR(7)&lt;br&gt;created_at : TIMESTAMPTZ" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=12;fontSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="80" y="200" width="270" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="reader_books" value="&lt;b&gt;reader_books&lt;/b&gt;&lt;hr&gt;PK id : SERIAL&lt;br&gt;FK reader_id : INTEGER&lt;br&gt;FK book_id : INTEGER&lt;br&gt;rating : SMALLINT (1-10)&lt;br&gt;date_read : DATE&lt;br&gt;notes : TEXT&lt;br&gt;created_at : TIMESTAMPTZ&lt;br&gt;updated_at : TIMESTAMPTZ&lt;br&gt;UQ (reader_id, book_id)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=12;fontSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="450" y="140" width="300" height="310" as="geometry" />
+        </mxCell>
+        <mxCell id="books" value="&lt;b&gt;books&lt;/b&gt;&lt;hr&gt;PK id : SERIAL&lt;br&gt;title : VARCHAR(200)&lt;br&gt;author : VARCHAR(150)&lt;br&gt;UQ isbn : VARCHAR(20)&lt;br&gt;cover_url : TEXT&lt;br&gt;created_at : TIMESTAMPTZ&lt;br&gt;updated_at : TIMESTAMPTZ" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=12;fontSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="850" y="180" width="280" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="reader_relationship" value="1 to many" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;" edge="1" parent="1" source="readers" target="reader_books">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="book_relationship" value="many to 1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=ERone;endFill=0;startArrow=ERmany;startFill=0;" edge="1" parent="1" source="reader_books" target="books">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
