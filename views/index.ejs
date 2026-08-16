@@ -28,6 +28,7 @@
       <div>
         <p class="eyebrow"><%= books.length %> <%= books.length === 1 ? 'book' : 'books' %> recorded</p>
         <h1><%= currentReader.name %>'s library</h1>
+        <a class="button add-book-button" href="/books/new?reader=<%= currentReader.id %>">Add a book</a>
       </div>
 
       <form class="sort-form" action="/" method="get">

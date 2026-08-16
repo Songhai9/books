@@ -8,8 +8,8 @@ end-to-end DevOps portfolio.
 
 ## Current status
 
-Phase 2.2 provides the multi-reader database schema. Reader selection, book
-CRUD, and Open Library integration come next.
+Phase 2.4 provides reader selection, reader-specific book lists, sorting, and
+ISBN-based book creation through Open Library. Editing and deletion come next.
 
 ## Requirements
 

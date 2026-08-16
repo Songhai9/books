@@ -1,5 +1,10 @@
 import express from "express";
 import { db } from "./db.js";
+import {
+  findBookByIsbn,
+  isValidIsbn,
+  normalizeIsbn,
+} from "./services/openLibrary.js";
 
 const app = express();
 const port = Number(process.env.PORT) || 3000;
@@ -15,6 +20,31 @@ const bookSorts = {
   recent: "reader_books.date_read DESC, books.title ASC",
   title: "books.title ASC",
 };
+
+async function getReader(readerId) {
+  if (!Number.isInteger(readerId) || readerId < 1) {
+    return null;
+  }
+
+  const result = await db.query(
+    "SELECT id, name, color FROM readers WHERE id = $1",
+    [readerId],
+  );
+
+  return result.rows[0] || null;
+}
+
+function getBookFormValues(input = {}) {
+  return {
+    isbn: normalizeIsbn(input.isbn),
+    title: input.title?.trim() || "",
+    author: input.author?.trim() || "",
+    coverUrl: input.coverUrl || "",
+    rating: input.rating || "",
+    dateRead: input.dateRead || "",
+    notes: input.notes?.trim() || "",
+  };
+}
 
 app.get("/", async (req, res, next) => {
   try {
@@ -109,6 +139,172 @@ app.post("/readers", async (req, res, next) => {
     }
 
     next(error);
+  }
+});
+
+app.get("/api/books/isbn/:isbn", async (req, res, next) => {
+  const isbn = normalizeIsbn(req.params.isbn);
+
+  if (!isValidIsbn(isbn)) {
+    return res.status(400).json({
+      error: "Enter a valid ISBN-10 or ISBN-13.",
+    });
+  }
+
+  try {
+    const book = await findBookByIsbn(isbn);
+
+    if (!book) {
+      return res.status(404).json({
+        error: "No book was found for this ISBN.",
+      });
+    }
+
+    res.status(200).json(book);
+  } catch (error) {
+    console.error("Open Library lookup failed:", error.message);
+    res.status(502).json({
+      error: "Open Library is temporarily unavailable.",
+    });
+  }
+});
+
+app.get("/books/new", async (req, res, next) => {
+  const readerId = Number.parseInt(req.query.reader, 10);
+  const reader = await getReader(readerId);
+
+  if (!reader) {
+    return res.status(404).render("error.ejs", {
+      pageTitle: "Reader not found",
+      statusCode: 404,
+      message: "Choose an existing reader before adding a book.",
+    });
+  }
+
+  const isbn = normalizeIsbn(req.query.isbn);
+  const values = getBookFormValues({ isbn });
+  let lookupMessage = null;
+  let lookupAttempted = Boolean(isbn);
+
+  if (lookupAttempted && !isValidIsbn(isbn)) {
+    lookupMessage = "Enter a valid ISBN-10 or ISBN-13.";
+    lookupAttempted = false;
+  } else if (lookupAttempted) {
+    try {
+      const book = await findBookByIsbn(isbn);
+
+      if (book) {
+        values.title = book.title;
+        values.author = book.author;
+        values.coverUrl = book.coverUrl || "";
+      } else {
+        lookupMessage =
+          "Open Library did not find this ISBN. You can enter the book manually.";
+      }
+    } catch (error) {
+      console.error("Open Library lookup failed:", error.message);
+      lookupMessage =
+        "Open Library is unavailable. You can still enter the book manually.";
+    }
+  }
+
+  res.render("new-book.ejs", {
+    pageTitle: `Add a book for ${reader.name}`,
+    reader,
+    lookupAttempted,
+    lookupMessage,
+    formError: null,
+    values,
+  });
+});
+
+app.post("/books", async (req, res, next) => {
+  const readerId = Number.parseInt(req.body.readerId, 10);
+  const reader = await getReader(readerId);
+
+  if (!reader) {
+    return res.status(404).render("error.ejs", {
+      pageTitle: "Reader not found",
+      statusCode: 404,
+      message: "Choose an existing reader before adding a book.",
+    });
+  }
+
+  const values = getBookFormValues(req.body);
+  const rating = Number.parseInt(values.rating, 10);
+  const validDate = /^\d{4}-\d{2}-\d{2}$/.test(values.dateRead);
+  const validCoverUrl = values.coverUrl.startsWith(
+    "https://covers.openlibrary.org/",
+  )
+    ? values.coverUrl
+    : null;
+
+  if (
+    !isValidIsbn(values.isbn) ||
+    !values.title ||
+    values.title.length > 200 ||
+    !values.author ||
+    values.author.length > 150 ||
+    !Number.isInteger(rating) ||
+    rating < 1 ||
+    rating > 10 ||
+    !validDate ||
+    !values.notes
+  ) {
+    return res.status(400).render("new-book.ejs", {
+      pageTitle: `Add a book for ${reader.name}`,
+      reader,
+      lookupAttempted: true,
+      lookupMessage: null,
+      formError:
+        "Complete every field and use a rating between 1 and 10.",
+      values,
+    });
+  }
+
+  const client = await db.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const bookResult = await client.query(
+      `INSERT INTO books (title, author, isbn, cover_url)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (isbn) DO UPDATE
+       SET
+         title = EXCLUDED.title,
+         author = EXCLUDED.author,
+         cover_url = COALESCE(EXCLUDED.cover_url, books.cover_url),
+         updated_at = CURRENT_TIMESTAMP
+       RETURNING id`,
+      [values.title, values.author, values.isbn, validCoverUrl],
+    );
+
+    await client.query(
+      `INSERT INTO reader_books (reader_id, book_id, rating, date_read, notes)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [reader.id, bookResult.rows[0].id, rating, values.dateRead, values.notes],
+    );
+
+    await client.query("COMMIT");
+    res.redirect(`/?reader=${reader.id}&sort=recent`);
+  } catch (error) {
+    await client.query("ROLLBACK");
+
+    if (error.code === "23505") {
+      return res.status(409).render("new-book.ejs", {
+        pageTitle: `Add a book for ${reader.name}`,
+        reader,
+        lookupAttempted: true,
+        lookupMessage: null,
+        formError: `${reader.name} has already recorded this book.`,
+        values,
+      });
+    }
+
+    next(error);
+  } finally {
+    client.release();
   }
 });
 
