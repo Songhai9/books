@@ -6,7 +6,14 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon --watch index.js --watch db.js --watch services --watch views --watch public index.js"
+    "dev": "nodemon --watch index.js --watch db.js --watch services --watch views --watch public index.js",
+    "lint": "eslint .",
+    "test": "npm run test:unit",
+    "test:unit": "node --test test/unit/*.test.js",
+    "test:integration": "node --test --test-concurrency=1 test/integration/*.test.js",
+    "test:coverage": "node --test --test-concurrency=1 --experimental-test-coverage --test-coverage-lines=80 --test-coverage-branches=70 --test-coverage-functions=80 test/unit/*.test.js test/integration/*.test.js",
+    "test:container": "docker compose -f compose.test.yml up --abort-on-container-exit --exit-code-from tests",
+    "test:container:down": "docker compose -f compose.test.yml down --volumes"
   },
   "keywords": [
     "express",
@@ -14,6 +21,9 @@
     "devops"
   ],
   "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
   "dependencies": {
     "axios": "^1.11.0",
     "dotenv": "^17.2.1",
@@ -22,6 +32,10 @@
     "pg": "^8.16.3"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.8.1",
+    "globals": "^17.11.0",
+    "nodemon": "^3.1.10",
+    "supertest": "^7.2.2"
   }
 }

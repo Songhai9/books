@@ -1,4 +1,5 @@
 import express from "express";
+import { pathToFileURL } from "node:url";
 import { db } from "./db.js";
 import {
   findBookByIsbn,
@@ -6,7 +7,7 @@ import {
   normalizeIsbn,
 } from "./services/openLibrary.js";
 
-const app = express();
+export const app = express();
 const port = Number(process.env.PORT) || 3000;
 
 app.set("view engine", "ejs");
@@ -177,7 +178,7 @@ app.post("/readers", async (req, res, next) => {
   }
 });
 
-app.get("/api/books/isbn/:isbn", async (req, res, next) => {
+app.get("/api/books/isbn/:isbn", async (req, res, _next) => {
   const isbn = normalizeIsbn(req.params.isbn);
 
   if (!isValidIsbn(isbn)) {
@@ -204,7 +205,7 @@ app.get("/api/books/isbn/:isbn", async (req, res, next) => {
   }
 });
 
-app.get("/books/new", async (req, res, next) => {
+app.get("/books/new", async (req, res, _next) => {
   const readerId = Number.parseInt(req.query.reader, 10);
   const reader = await getReader(readerId);
 
@@ -532,7 +533,7 @@ app.use((req, res) => {
   });
 });
 
-app.use((error, req, res, next) => {
+app.use((error, req, res, _next) => {
   console.error("Unexpected application error:", error);
 
   res.status(500).render("error.ejs", {
@@ -542,12 +543,21 @@ app.use((error, req, res, next) => {
   });
 });
 
-app.listen(port, (error) => {
-  if (error) {
-    console.error("Book Notes failed to start:", error.message);
-    process.exitCode = 1;
-    return;
-  }
+export function startServer() {
+  return app.listen(port, (error) => {
+    if (error) {
+      console.error("Book Notes failed to start:", error.message);
+      process.exitCode = 1;
+      return;
+    }
 
-  console.log(`Book Notes is running on http://localhost:${port}`);
-});
+    console.log(`Book Notes is running on http://localhost:${port}`);
+  });
+}
+
+const isMainModule =
+  process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isMainModule) {
+  startServer();
+}

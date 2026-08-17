@@ -1,0 +1,38 @@
+name: book-notes-tests
+
+services:
+  postgres-test:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: book_notes_test
+      POSTGRES_USER: book_notes_test
+      POSTGRES_PASSWORD: book_notes_test_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U book_notes_test -d book_notes_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+    tmpfs:
+      - /var/lib/postgresql/data
+
+  tests:
+    image: node:24-bookworm-slim
+    working_dir: /app
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    environment:
+      NODE_ENV: test
+      DATABASE_HOST: postgres-test
+      DATABASE_PORT: 5432
+      DATABASE_NAME: book_notes_test
+      DATABASE_USER: book_notes_test
+      DATABASE_PASSWORD: book_notes_test_password
+      DATABASE_SSL: "false"
+    volumes:
+      - .:/app
+      - test-node-modules:/app/node_modules
+    command: sh -c "npm ci && npm run lint && npm run test:coverage"
+
+volumes:
+  test-node-modules:

@@ -45,3 +45,25 @@ One book can therefore have different ratings and notes from different readers.
 npm run dev
 npm start
 ```
+
+## Tests
+
+Fast unit tests do not require PostgreSQL:
+
+```bash
+npm run lint
+npm run test:unit
+```
+
+The complete suite uses an isolated PostgreSQL database in Docker. It never
+uses the local `book_notes` database configured in `.env`:
+
+```bash
+npm run test:container
+npm run test:container:down
+```
+
+The containerized suite runs linting, unit tests, HTTP/database integration
+tests, and code coverage. Integration tests also refuse to reset a database
+unless its name ends in `_test`. The suite fails if coverage falls below 80%
+for lines, 70% for branches, or 80% for functions.

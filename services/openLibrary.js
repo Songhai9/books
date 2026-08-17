@@ -17,14 +17,14 @@ export function isValidIsbn(isbn) {
   return /^(?:\d{13}|\d{9}[\dX])$/.test(normalizeIsbn(isbn));
 }
 
-export async function findBookByIsbn(value) {
+export async function findBookByIsbn(value, httpClient = openLibrary) {
   const isbn = normalizeIsbn(value);
 
   if (!isValidIsbn(isbn)) {
     return null;
   }
 
-  const response = await openLibrary.get("/search.json", {
+  const response = await httpClient.get("/search.json", {
     params: {
       isbn,
       fields: "key,title,author_name,cover_i",
