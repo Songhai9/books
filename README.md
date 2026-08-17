@@ -128,7 +128,26 @@ pull request, and manual dispatch. It contains three jobs:
 
 Both Compose environments are removed at the end of their jobs, including when
 a preceding step fails. The workflow has read-only repository permissions and
-does not publish or deploy anything yet.
+does not publish or deploy anything.
 
+## Releases and container image
 
-I'm testing the ruleset
+Pushing a semantic version tag such as `v1.0.0` triggers
+`.github/workflows/release.yml`. The workflow authenticates to GitHub Container
+Registry with its short-lived `GITHUB_TOKEN`, builds the production image, and
+publishes these tags:
+
+- `ghcr.io/songhai9/books:1.0.0`
+- `ghcr.io/songhai9/books:1.0`
+- `ghcr.io/songhai9/books:1`
+- `ghcr.io/songhai9/books:latest`
+
+After publishing, the workflow pulls the versioned image from GHCR, starts it,
+and checks `GET /health`. Create GitHub releases only after this verification
+succeeds.
+
+Pull a published version with:
+
+```bash
+docker pull ghcr.io/songhai9/books:1.0.0
+```

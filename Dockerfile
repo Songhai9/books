@@ -13,6 +13,10 @@ FROM node:24-bookworm-slim AS runtime
 ENV NODE_ENV=production \
     PORT=3000
 
+LABEL org.opencontainers.image.source="https://github.com/Songhai9/books" \
+      org.opencontainers.image.description="Simple Express and PostgreSQL book notes application" \
+      org.opencontainers.image.licenses="MIT"
+
 WORKDIR /app
 
 COPY --from=production-dependencies --chown=node:node /app/node_modules ./node_modules
