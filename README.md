@@ -80,3 +80,36 @@ The final image contains only production dependencies and application files.
 It runs as the unprivileged `node` user and exposes a Docker health check on
 `GET /health`. Database settings must be supplied through environment variables
 when the container starts; `.env` is deliberately excluded from the image.
+
+## Application stack with Docker Compose
+
+Start the application and PostgreSQL together:
+
+```bash
+npm run compose:up
+```
+
+Open `http://localhost:3000`. Compose builds the production application image,
+waits for PostgreSQL to become healthy, and initializes `sql/schema.sql` when
+the database volume is created for the first time.
+
+Stop the stack without deleting books:
+
+```bash
+npm run compose:down
+```
+
+Follow the container logs with `npm run compose:logs`. PostgreSQL is also
+available to pgAdmin on `localhost:5433` with these local defaults:
+
+- database: `book_notes`
+- username: `book_notes`
+- password: `book_notes_password`
+
+These values and the published ports can be overridden with `POSTGRES_DB`,
+`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST_PORT`, and `APP_PORT`.
+For a real deployment, provide a secret password instead of the local default.
+
+The named `book-notes_postgres-data` volume keeps data between restarts. To
+deliberately erase the Compose database and reapply the schema from scratch,
+run `docker compose down --volumes`.
