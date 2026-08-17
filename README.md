@@ -8,8 +8,8 @@ end-to-end DevOps portfolio.
 
 ## Current status
 
-Phase 2.5 provides reader selection, ISBN-based book creation through Open
-Library, reader-specific book details, editing, and deletion.
+The application features are complete, the automated test suite is in place,
+and a production multi-stage Docker image is available.
 
 ## Requirements
 
@@ -67,3 +67,16 @@ The containerized suite runs linting, unit tests, HTTP/database integration
 tests, and code coverage. Integration tests also refuse to reset a database
 unless its name ends in `_test`. The suite fails if coverage falls below 80%
 for lines, 70% for branches, or 80% for functions.
+
+## Production image
+
+Build the production image locally:
+
+```bash
+npm run docker:build
+```
+
+The final image contains only production dependencies and application files.
+It runs as the unprivileged `node` user and exposes a Docker health check on
+`GET /health`. Database settings must be supplied through environment variables
+when the container starts; `.env` is deliberately excluded from the image.
