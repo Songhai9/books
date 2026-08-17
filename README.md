@@ -113,3 +113,19 @@ For a real deployment, provide a secret password instead of the local default.
 The named `book-notes_postgres-data` volume keeps data between restarts. To
 deliberately erase the Compose database and reapply the schema from scratch,
 run `docker compose down --volumes`.
+
+## Continuous integration
+
+The GitHub Actions workflow in `.github/workflows/ci.yml` runs on every push,
+pull request, and manual dispatch. It contains three jobs:
+
+1. `quality` installs the locked dependencies, runs ESLint, and runs unit tests.
+2. `integration` runs the complete test suite and coverage gates against an
+   isolated PostgreSQL container.
+3. `production-image` runs only after the first two jobs succeed. It builds the
+   multi-stage image, starts it with PostgreSQL, and checks `/health` and
+   `/ready`.
+
+Both Compose environments are removed at the end of their jobs, including when
+a preceding step fails. The workflow has read-only repository permissions and
+does not publish or deploy anything yet.
