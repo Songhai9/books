@@ -1,6 +1,6 @@
 {
   "name": "book-notes",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple book notes application for an end-to-end DevOps portfolio.",
   "main": "index.js",
   "type": "module",
