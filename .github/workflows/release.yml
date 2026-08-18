@@ -9,8 +9,44 @@ env:
   IMAGE: ghcr.io/songhai9/books
 
 jobs:
+  security:
+    name: Scan the release candidate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out the release source
+        uses: actions/checkout@v7
+
+      - name: Build the release candidate
+        run: docker build --tag book-notes:release-candidate .
+
+      - name: Block high and critical image vulnerabilities
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: book-notes:release-candidate
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: 1
+          format: table
+
+      - name: Generate the release CycloneDX SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          image: book-notes:release-candidate
+          format: cyclonedx-json
+          artifact-name: book-notes-${{ github.ref_name }}-sbom
+          output-file: book-notes-${{ github.ref_name }}.cdx.json
+          upload-artifact-retention: 90
+          upload-release-assets: false
+
   publish:
     name: Publish versioned image to GHCR
+    needs: security
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
