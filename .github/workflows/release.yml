@@ -104,7 +104,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: Songhai9/books-k8s/.github/workflows/deploy.yml@codex/automatic-release-deployment
+    uses: Songhai9/books-k8s/.github/workflows/deploy.yml@bd5be956e04fc7bd3e0bc97712339e53c4a86b2e
     with:
       image_tag: ${{ needs.publish.outputs.image_tag }}
       aws_role_arn: ${{ vars.AWS_KUBERNETES_CD_ROLE_ARN }}
