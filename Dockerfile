@@ -26,6 +26,13 @@ COPY --chown=node:node services ./services
 COPY --chown=node:node views ./views
 COPY --chown=node:node public ./public
 
+# npm is useful while building dependencies, but the application only needs
+# the Node.js runtime in production. Removing it also removes its unused
+# transitive packages from the attack surface of the final image.
+RUN rm -rf /usr/local/lib/node_modules/npm \
+    /usr/local/bin/npm \
+    /usr/local/bin/npx
+
 USER node
 
 EXPOSE 3000

@@ -130,6 +130,18 @@ Both Compose environments are removed at the end of their jobs, including when
 a preceding step fails. The workflow has read-only repository permissions and
 does not publish or deploy anything.
 
+## Security checks
+
+The security workflow runs on pull requests, pushes to `main`, every Monday,
+and on demand. It blocks changes when Gitleaks finds a committed secret, npm
+reports a high or critical dependency vulnerability, CodeQL finds a relevant
+JavaScript issue, or Trivy finds a high or critical vulnerability with an
+available fix in the production image.
+
+The image job also publishes a CycloneDX SBOM as a workflow artifact for 14
+days. The SBOM is an inventory, not a vulnerability report: it records the
+packages contained in the exact image that was scanned.
+
 ## Releases and container image
 
 Pushing a semantic version tag such as `v1.0.0` triggers
@@ -145,6 +157,11 @@ publishes these tags:
 After publishing, the workflow pulls the versioned image from GHCR, starts it,
 and checks `GET /health`. Create GitHub releases only after this verification
 succeeds.
+
+Before publication, the release workflow independently builds and scans a
+release candidate. A high or critical fixable vulnerability stops both the
+registry publication and Kubernetes deployment. Its version-specific SBOM is
+retained as a workflow artifact for 90 days.
 
 Pull a published version with:
 
